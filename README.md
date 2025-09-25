@@ -45,4 +45,4 @@ Open http://localhost:3000 and try a prompt. Without `FAL_KEY`, the UI loads but
 - Learnings: edge route ergonomics, mapping UI controls to model params, and simple DB‑backed “collections”
 
 ## License
-All rights reserved. Personal portfolio project — not for commercial use.
+All rights reserved. Personal portfolio project — not for production use.
