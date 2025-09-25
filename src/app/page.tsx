@@ -44,9 +44,8 @@ export default function Home() {
   const [resolution, setResolution] = useState(768);
   const [cfg, setCfg] = useState(7);
   const [steps, setSteps] = useState(30);
-  const [seed, setSeed] = useState<number>(() =>
-    Math.floor(Math.random() * 1_000_000)
-  );
+  // Important: initialize deterministically to avoid SSR/client hydration mismatch
+  const [seed, setSeed] = useState<number>(0);
   const [generating, setGenerating] = useState(false);
   const [renders, setRenders] = useState<Render[]>([]);
   const [showHistory, setShowHistory] = useState(false);
@@ -78,6 +77,14 @@ export default function Home() {
       window.history.replaceState({}, "", url.toString());
     }
     setCollectionId(c);
+  }, []);
+
+  // Set a random seed on the client after mount (keeps SSR deterministic)
+  useEffect(() => {
+    if (seed === 0) {
+      setSeed(Math.floor(Math.random() * 1_000_000));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load history for collection
