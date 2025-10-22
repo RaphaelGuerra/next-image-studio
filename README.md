@@ -1,5 +1,18 @@
 # AI Image Studio
 
+Last updated: 2025-10-22
+
+## Table of Contents
+
+<!-- TOC start -->
+- [What It Does](#what-it-does)
+- [How It Works](#how-it-works)
+- [Tech Stack](#tech-stack)
+- [Run Locally](#run-locally)
+- [Status & Learnings](#status-learnings)
+- [License](#license)
+<!-- TOC end -->
+
 Small, focused image generation playground with prompt, style presets, and quick batching.
 
 This is a side project for learning and practicing — exploring modern Next.js (App Router), edge APIs, simple history storage, and a friendly prompt-to-image UI. It’s not a production system.
