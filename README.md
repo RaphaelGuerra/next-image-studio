@@ -9,7 +9,7 @@ Last updated: 2025-11-29
 - [How It Works](#how-it-works)
 - [Tech Stack](#tech-stack)
 - [Run Locally](#run-locally)
-- [Status & Learnings](#status-learnings)
+- [Status & Learnings](#status--learnings)
 - [License](#license)
 <!-- TOC end -->
 
