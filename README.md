@@ -21,6 +21,8 @@ This is a side project for learning and practicing — exploring modern Next.js 
 
 Branding and UI visuals are placeholders for demo purposes only.
 
+Live demo: none (requires `FAL_KEY`; run locally)
+
 ## What It Does
 - Type a prompt, optionally pick a style preset, and choose a model (FLUX.1 Pro / Dev / Schnell)
 - Adjust aspect ratio, resolution (long edge), CFG guidance, steps, and seed
