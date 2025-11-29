@@ -40,18 +40,19 @@ export async function GET(req: NextRequest) {
           ORDER BY created_at DESC LIMIT 200`,
     args: [collectionId],
   });
-  const items = rs.rows.map((r: any) => ({
-    id: r.id as string,
-    collectionId: r.collection_id as string,
-    createdAt: Number(r.created_at),
-    prompt: (r.prompt as string) ?? "",
-    style: (r.style as string) ?? null,
-    modelId: (r.model_id as string) ?? "",
-    aspect: (r.aspect as string) ?? "1:1",
+  const rows = rs.rows as Array<Record<string, unknown>>;
+  const items = rows.map((r) => ({
+    id: String(r.id ?? ""),
+    collectionId: String(r.collection_id ?? ""),
+    createdAt: Number(r.created_at ?? 0),
+    prompt: typeof r.prompt === "string" ? r.prompt : "",
+    style: typeof r.style === "string" ? r.style : null,
+    modelId: typeof r.model_id === "string" ? r.model_id : "",
+    aspect: typeof r.aspect === "string" ? r.aspect : "1:1",
     seed: Number(r.seed ?? 0),
     width: Number(r.width ?? 0),
     height: Number(r.height ?? 0),
-    imageUrl: (r.image_url as string) ?? "",
+    imageUrl: typeof r.image_url === "string" ? r.image_url : "",
   } satisfies HistoryItem));
   return new Response(JSON.stringify({ items }), {
     status: 200,
@@ -100,7 +101,7 @@ export async function POST(req: NextRequest) {
         const utSecret = process.env.UPLOADTHING_SECRET;
         if (utSecret && imageUrl && !imageUrl.includes("utfs.io")) {
           const mod = await import("uploadthing/server");
-          const { UTApi } = mod as any;
+          const { UTApi } = mod;
           const utapi = new UTApi();
           const resp = await fetch(imageUrl);
           const arrayBuf = await resp.arrayBuffer();
@@ -108,20 +109,25 @@ export async function POST(req: NextRequest) {
           const ext = type.split("/")[1] || "png";
           const name = `gen-${crypto.randomUUID()}.${ext}`;
           // Node may not have File in older versions; create a polyfill
-          const _File = (globalThis as any).File ||
+          const globalFile = (globalThis as { File?: typeof File }).File;
+          const _File = globalFile ||
             class NodeFile extends Blob {
               name: string;
               lastModified: number;
-              constructor(parts: any[], name: string, opts?: any) {
+              constructor(parts: BlobPart[], name: string, opts?: BlobPropertyBag) {
                 super(parts, opts);
                 this.name = name;
                 this.lastModified = Date.now();
               }
             };
           const file = new _File([arrayBuf], name, { type });
-          const up = await utapi.uploadFiles([file as any]);
-          const first = Array.isArray(up) ? up[0] : up?.data?.[0] ?? up?.data;
-          const url = (first?.url as string) || (first?.ufsUrl as string);
+          const up = await utapi.uploadFiles([file as File]);
+          type UploadThingResult = { url?: string; ufsUrl?: string };
+          const first = Array.isArray(up)
+            ? (up as UploadThingResult[])[0]
+            : (up as { data?: UploadThingResult[] | UploadThingResult }).data;
+          const firstResult = Array.isArray(first) ? first[0] : first;
+          const url = firstResult?.url || firstResult?.ufsUrl;
           if (url) imageUrl = url;
         }
       } catch (e) {

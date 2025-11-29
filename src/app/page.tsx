@@ -147,7 +147,10 @@ export default function Home() {
 
       if (!res.ok) throw new Error("Generation failed");
       const data = await res.json();
-      const urls: string[] = (data?.images ?? []).map((i: any) => i?.url).filter(Boolean);
+      const images = Array.isArray(data?.images) ? data.images : [];
+      const urls: string[] = images
+        .map((i: { url?: string }) => i?.url)
+        .filter(Boolean);
       const baseSeed = data?.seed ?? seed;
       const w = data?.width ?? undefined;
       const h = data?.height ?? undefined;

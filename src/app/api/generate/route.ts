@@ -25,6 +25,13 @@ const MODEL_ROUTE: Record<string, string> = {
   "flux-schnell": "fal-ai/flux-schnell",
 };
 
+type FalImageResult = string | { url?: string; seed?: number };
+type FalRunResult = {
+  images?: FalImageResult[];
+  image?: FalImageResult;
+  seed?: number;
+};
+
 function dimsFromAspect(aspect: Body["aspect"], resolution: number) {
   // Interpret resolution as the longer side
   const map: Record<Body["aspect"], [number, number]> = {
@@ -87,23 +94,21 @@ export async function POST(req: Request) {
     });
 
     // Normalize output to an array of URLs
-    let urls: string[] = [];
-    // Common fal output shape
-    const anyResult = result as any;
-    if (Array.isArray(anyResult?.images)) {
-      urls = anyResult.images
-        .map((img: any) => (typeof img === "string" ? img : img?.url))
-        .filter(Boolean);
-    } else if (anyResult?.image) {
-      const img = anyResult.image;
-      const u = typeof img === "string" ? img : img?.url;
-      if (u) urls = [u];
-    }
+    const falResult = result as FalRunResult;
+    const extractUrl = (img?: FalImageResult) => {
+      if (!img) return null;
+      return typeof img === "string" ? img : img.url ?? null;
+    };
+    const urls: string[] = Array.isArray(falResult.images)
+      ? falResult.images.map(extractUrl).filter(Boolean) as string[]
+      : extractUrl(falResult.image)
+        ? [extractUrl(falResult.image) as string]
+        : [];
 
     return new Response(
       JSON.stringify({
         images: urls.map((u: string) => ({ url: u })),
-        seed: anyResult?.seed ?? seed,
+        seed: falResult?.seed ?? seed,
         width,
         height,
       }),
