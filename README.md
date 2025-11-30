@@ -1,7 +1,6 @@
 # AI Image Studio
 
-[![Lint](https://github.com/RaphaelGuerra/next-image-studio/actions/workflows/lint.yml/badge.svg)](https://github.com/RaphaelGuerra/next-image-studio/actions/workflows/lint.yml)
-[![Security](https://github.com/RaphaelGuerra/next-image-studio/actions/workflows/security.yml/badge.svg)](https://github.com/RaphaelGuerra/next-image-studio/actions/workflows/security.yml)
+Last updated: 2025-11-30
 
 ## Table of Contents
 
@@ -13,6 +12,10 @@
 - [Status & Learnings](#status--learnings)
 - [License](#license)
 <!-- TOC end -->
+
+[![Lint](https://github.com/RaphaelGuerra/next-image-studio/actions/workflows/lint.yml/badge.svg)](https://github.com/RaphaelGuerra/next-image-studio/actions/workflows/lint.yml)
+[![Security](https://github.com/RaphaelGuerra/next-image-studio/actions/workflows/security.yml/badge.svg)](https://github.com/RaphaelGuerra/next-image-studio/actions/workflows/security.yml)
+
 
 Small, focused image generation playground with prompt, style presets, and quick batching.
 
