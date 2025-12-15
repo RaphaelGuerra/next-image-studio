@@ -11,7 +11,7 @@
   "dependencies": {
     "@fal-ai/serverless-client": "^0.15.0",
     "@libsql/client": "^0.15.14",
-    "next": "15.5.7",
+    "next": "15.5.9",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "uploadthing": "^7.7.4"
@@ -24,7 +24,7 @@
     "@tailwindcss/postcss": "^4",
     "tailwindcss": "^4",
     "eslint": "^9",
-    "eslint-config-next": "15.5.7",
+    "eslint-config-next": "15.5.9",
     "@eslint/eslintrc": "^3"
   }
 }
