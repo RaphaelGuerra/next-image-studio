@@ -116,6 +116,18 @@ export async function POST(req: Request) {
     const styleSuffix = style ? `, ${style.toLowerCase()}` : "";
     const fullPrompt = `${promptRaw}${styleSuffix}`.trim();
 
+    if (!process.env.FAL_KEY) {
+      return new Response(
+        JSON.stringify({
+          images: [],
+          seed,
+          width,
+          height,
+          demo: true,
+        }),
+        { status: 200, headers: { "content-type": "application/json" } }
+      );
+    }
 
     const result = await fal.run(route, {
       input: {
