@@ -203,6 +203,27 @@ export default function Home() {
     })();
   }, [collectionId]);
 
+  function canDownload(url: string) {
+    return /^(https?:|data:|blob:)/.test(url);
+  }
+
+  async function downloadImage(url: string, filename: string) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to fetch image");
+      const blob = await res.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(link.href);
+    } catch {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  }
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const handle = window.setTimeout(() => {
@@ -551,6 +572,18 @@ export default function Home() {
                 key={r.id}
                 className={`relative overflow-hidden rounded-xl border border-white/10`}
               >
+                <div className="absolute right-2 top-2 z-10 flex gap-2">
+                  {canDownload(r.url) ? (
+                    <button
+                      className="chip"
+                      onClick={() =>
+                        downloadImage(r.url, `render-${r.seed}.png`)
+                      }
+                    >
+                      Download
+                    </button>
+                  ) : null}
+                </div>
                 <div style={{ paddingTop: aspectPadding }} />
                 <div className="absolute inset-0 grain" />
                 <div
