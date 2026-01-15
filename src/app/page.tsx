@@ -127,8 +127,14 @@ export default function Home() {
   const [showHistory, setShowHistory] = useState(false);
   const [collectionId, setCollectionId] = useState<string | null>(null);
   const [historyConfigured, setHistoryConfigured] = useState<boolean | null>(null);
+  const [cooldownUntil, setCooldownUntil] = useState(0);
 
-  const canGenerate = prompt.trim().length > 0 && !generating;
+  const now = Date.now();
+  const inCooldown = cooldownUntil > now;
+  const canGenerate = prompt.trim().length > 0 && !generating && !inCooldown;
+  const cooldownSeconds = inCooldown
+    ? Math.ceil((cooldownUntil - now) / 1000)
+    : 0;
 
   const aspectPadding = useMemo(() => {
     switch (aspect) {
@@ -142,6 +148,13 @@ export default function Home() {
         return "56.25%";
     }
   }, [aspect]);
+
+  useEffect(() => {
+    if (!cooldownUntil) return;
+    const delay = Math.max(0, cooldownUntil - Date.now());
+    const timer = window.setTimeout(() => setCooldownUntil(0), delay);
+    return () => window.clearTimeout(timer);
+  }, [cooldownUntil]);
 
   // Hydrate local state for prompt, settings, and recent renders
   useEffect(() => {
@@ -350,6 +363,7 @@ export default function Home() {
       console.error(e);
     } finally {
       setGenerating(false);
+      setCooldownUntil(Date.now() + 1500);
     }
   }
 
@@ -568,7 +582,11 @@ export default function Home() {
               >
                 <span className="flex items-center gap-2">
                   {generating ? <Spinner /> : <SparklesIcon />}
-                  {generating ? "Generating" : "Generate"}
+                  {generating
+                    ? "Generating"
+                    : inCooldown
+                      ? `Cooldown ${cooldownSeconds}s`
+                      : "Generate"}
                 </span>
               </button>
             </div>
