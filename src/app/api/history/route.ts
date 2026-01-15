@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
   }
   const db = getDb();
   if (!db) {
-    return new Response(JSON.stringify({ items: [] }), {
+    return new Response(JSON.stringify({ configured: false, items: [] }), {
       status: 200,
       headers: { "content-type": "application/json" },
     });
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const db = getDb();
   if (!db) {
-    return new Response(JSON.stringify({ error: "Database not configured" }), {
+    return new Response(JSON.stringify({ configured: false, error: "Database not configured" }), {
       status: 501,
       headers: { "content-type": "application/json" },
     });

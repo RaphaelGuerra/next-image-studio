@@ -114,6 +114,7 @@ export default function Home() {
   const [renders, setRenders] = useState<Render[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [collectionId, setCollectionId] = useState<string | null>(null);
+  const [historyConfigured, setHistoryConfigured] = useState<boolean | null>(null);
 
   const canGenerate = prompt.trim().length > 0 && !generating;
 
@@ -166,8 +167,16 @@ export default function Home() {
     (async () => {
       try {
         const res = await fetch(`/api/history?collectionId=${collectionId}`);
-        if (!res.ok) return;
+        if (!res.ok) {
+          if (res.status === 501) setHistoryConfigured(false);
+          return;
+        }
         const data = await res.json();
+        if (data?.configured === false) {
+          setHistoryConfigured(false);
+          return;
+        }
+        setHistoryConfigured(true);
         const items = (data?.items ?? []) as Array<{
           prompt: string;
           style: string | null;
@@ -575,6 +584,11 @@ export default function Home() {
               Close
             </button>
           </div>
+          {historyConfigured === false && (
+            <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+              Database not configured. Using local browser history.
+            </div>
+          )}
           <div
             className="grid gap-3 overflow-auto pr-1"
             style={{ gridTemplateColumns: "1fr 1fr" }}
