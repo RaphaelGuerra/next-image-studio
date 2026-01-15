@@ -10,11 +10,23 @@ type Model = {
   tags: string[];
 };
 
+type ModelPreset = {
+  resolution: number;
+  cfg: number;
+  steps: number;
+};
+
 const MODELS: Model[] = [
   { id: "flux-pro", name: "FLUX.1 Pro", tags: ["quality", "photoreal"] },
   { id: "flux-dev", name: "FLUX.1 Dev", tags: ["balanced", "general"] },
   { id: "flux-schnell", name: "FLUX.1 Schnell", tags: ["fast", "iterative"] },
 ];
+
+const MODEL_PRESETS: Record<string, ModelPreset> = {
+  "flux-pro": { resolution: 1024, cfg: 7, steps: 40 },
+  "flux-dev": { resolution: 768, cfg: 6, steps: 30 },
+  "flux-schnell": { resolution: 640, cfg: 5, steps: 20 },
+};
 
 const STYLE_PRESETS = [
   "Cinematic",
@@ -375,7 +387,15 @@ export default function Home() {
               {MODELS.map((m) => (
                 <button
                   key={m.id}
-                  onClick={() => setModel(m)}
+                  onClick={() => {
+                    setModel(m);
+                    const preset = MODEL_PRESETS[m.id];
+                    if (preset) {
+                      setResolution(preset.resolution);
+                      setCfg(preset.cfg);
+                      setSteps(preset.steps);
+                    }
+                  }}
                   className={`w-full text-left p-3 rounded-lg border transition-colors ${
                     model.id === m.id
                       ? "border-violet-400/30 bg-violet-500/10"
