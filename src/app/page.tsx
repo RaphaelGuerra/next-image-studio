@@ -36,6 +36,69 @@ type Render = {
   url: string;
 };
 
+type LocalState = {
+  schemaVersion: 1;
+  prompt: string;
+  style: string | null;
+  modelId: string;
+  aspect: Aspect;
+  resolution: number;
+  cfg: number;
+  steps: number;
+  seed: number;
+  renders: Render[];
+};
+
+const LOCAL_STATE_KEY = "next-image-studio.v1";
+const LOCAL_SCHEMA_VERSION = 1;
+const SUPPORTED_ASPECTS: Aspect[] = ["1:1", "3:4", "4:3", "16:9"];
+
+function asAspect(value: unknown): Aspect {
+  return SUPPORTED_ASPECTS.includes(value as Aspect) ? (value as Aspect) : "1:1";
+}
+
+function clampNumber(value: unknown, min: number, max: number, fallback: number) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return fallback;
+  return Math.min(max, Math.max(min, num));
+}
+
+function loadLocalState(): LocalState | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(LOCAL_STATE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<LocalState>;
+    if (parsed.schemaVersion !== LOCAL_SCHEMA_VERSION) return null;
+    const renders = Array.isArray(parsed.renders)
+      ? parsed.renders.filter((r) => typeof r?.url === "string")
+      : [];
+    return {
+      schemaVersion: LOCAL_SCHEMA_VERSION,
+      prompt: typeof parsed.prompt === "string" ? parsed.prompt : "",
+      style: typeof parsed.style === "string" ? parsed.style : null,
+      modelId: typeof parsed.modelId === "string" ? parsed.modelId : MODELS[0].id,
+      aspect: asAspect(parsed.aspect),
+      resolution: clampNumber(parsed.resolution, 512, 1024, 768),
+      cfg: clampNumber(parsed.cfg, 1, 20, 7),
+      steps: clampNumber(parsed.steps, 4, 60, 30),
+      seed: clampNumber(parsed.seed, 0, 1_000_000, Math.floor(Math.random() * 1_000_000)),
+      renders: renders.slice(0, 100) as Render[],
+    };
+  } catch {
+    return null;
+  }
+}
+
+function saveLocalState(state: LocalState) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(LOCAL_STATE_KEY, JSON.stringify(state));
+  } catch {
+    // ignore storage errors
+  }
+}
+
 export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [style, setStyle] = useState<string | null>(null);
@@ -66,6 +129,23 @@ export default function Home() {
         return "56.25%";
     }
   }, [aspect]);
+
+  // Hydrate local state for prompt, settings, and recent renders
+  useEffect(() => {
+    const saved = loadLocalState();
+    if (!saved) return;
+    setPrompt(saved.prompt);
+    setStyle(saved.style);
+    setAspect(saved.aspect);
+    setResolution(saved.resolution);
+    setCfg(saved.cfg);
+    setSteps(saved.steps);
+    setSeed(saved.seed);
+    setRenders(saved.renders);
+    const savedModel =
+      MODELS.find((m) => m.id === saved.modelId) ?? MODELS[0];
+    setModel(savedModel);
+  }, []);
 
   // Initialize or read collection id from URL (?c=...)
   useEffect(() => {
@@ -107,12 +187,31 @@ export default function Home() {
           aspect: (it.aspect as Aspect) ?? "1:1",
           url: it.imageUrl,
         }));
-        setRenders(mapped);
+        if (mapped.length > 0) setRenders(mapped);
       } catch (e) {
         console.error(e);
       }
     })();
   }, [collectionId]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handle = window.setTimeout(() => {
+      saveLocalState({
+        schemaVersion: LOCAL_SCHEMA_VERSION,
+        prompt,
+        style,
+        modelId: model.id,
+        aspect,
+        resolution,
+        cfg,
+        steps,
+        seed,
+        renders: renders.slice(0, 100),
+      });
+    }, 300);
+    return () => window.clearTimeout(handle);
+  }, [prompt, style, model.id, aspect, resolution, cfg, steps, seed, renders]);
 
   function mockImage(seedLocal: number) {
     // Fallback gradient (kept for visual continuity if needed)
