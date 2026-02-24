@@ -1,6 +1,6 @@
 # AI Image Studio
 
-Last updated: 2026-02-21
+Last updated: 2026-02-24
 
 ## Table of Contents
 
@@ -9,6 +9,7 @@ Last updated: 2026-02-21
 - [How It Works](#how-it-works)
 - [Tech Stack](#tech-stack)
 - [Run Locally](#run-locally)
+- [Database Migration](#database-migration)
 - [Status & Learnings](#status--learnings)
 - [License](#license)
 <!-- TOC end -->
@@ -58,6 +59,14 @@ npm run dev
 - Optional mirroring: set `UPLOADTHING_SECRET`
 
 Open http://localhost:3000 and try a prompt. Without `FAL_KEY`, the UI loads but image generation will not work.
+
+## Database Migration
+- Command: `npm run db:migrate`
+- Script: `scripts/db-migrate.mjs`
+- Required env vars:
+  - `TURSO_DATABASE_URL`
+  - `TURSO_AUTH_TOKEN`
+- Creates `history_items` table (if missing) and index `idx_history_collection_created`.
 
 ## Status & Learnings
 - Current: functional prototype to experiment with prompt UIs and serverless image APIs
